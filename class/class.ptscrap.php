@@ -24,18 +24,31 @@ class ptscrap extends simple_html_dom {
 		        $plaintext = $pin->innertext;
 		    }
 		    
-		    $plaintext = explode(',', $plaintext);
-		    $plaintext = explode('>', $plaintext[1]);
-		    $pins = (int)$plaintext[1];
-		    $this->pins = $pins;
+		    if(strstr($plaintext, ',')) {
+			    $plaintext = explode(',', $plaintext);
+			    $plaintext = explode('>', $plaintext[1]);
+			    $pins = (int)$plaintext[1];
+			    $this->pins = $pins;	
+		    }
+		    else {
+		    	$plaintext = explode('>', $plaintext);
+		    	$plaintext = explode('<', $plaintext[1]);
+			    $pins = (int)$plaintext[0];
+			    $this->pins = $pins;	
+		    }
 
-		    if($pins > 50)
-		        $pages = ceil($pins/$pinsPerPage);
-		    else
-		        $pages = 1;
+		    if($pins != 0) {
+			    if($pins > 50)
+			        $pages = ceil($pins/$pinsPerPage);
+			    else
+			        $pages = 1;
 
-		    $this->pages = $pages; 
-		    $this->html->clear();
+			    $this->pages = $pages; 
+			    $this->html->clear();
+			}
+			else {
+				return false;
+			}
 
 	    } 
 	    else {
@@ -96,7 +109,7 @@ class ptscrap extends simple_html_dom {
 		chdir("tmp");
 		unlink($tmp);	
 
-		exec('zip -o ' . $path . ' ' . $tmp_zip . ' *');
+		exec('zip -o ' . $path . ' ' . $tmp_zip . ' * -x index.html');
 		$filesize = filesize($path);
 		exec('mv ' . $path . ' ../files');
 		$this->file = $path;

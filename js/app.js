@@ -52,7 +52,7 @@ jQuery(document).ready(function($) {
 			async: false,  
 			success: function(json){  
 				console.log(json);
-				if(json.pins) {
+				if(!(json.error)) {
 				  	console.log(json);
 				  	totalPins = json.pins;
 				  	$('p#status').text('Retrieving ' + json.pins + ' pins (' + json.pages + ' pages to load)…');
@@ -94,7 +94,7 @@ jQuery(document).ready(function($) {
 				  	$("div.file").fadeIn(800);
 		  		}
 		  		else {
-		  			console.log('error ! Message : ' + json.error);
+		  			console.log('error, not delivered ! Message : ' + json.error);
 		  			$("div.result").hide();
 		  			$("div.error").show();
 		  			$("p.message").html("<strong>Error :</strong> " + json.error + "!<br/>Should be <strong>/username/board/</strong>");

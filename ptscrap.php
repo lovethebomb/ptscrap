@@ -30,10 +30,18 @@ if($_GET){
                 echo json_encode(array('files' => $files));
             }
             elseif($action == "getTotalPins") {
+
                 $ptscrap = new ptscrap($url);
-                $pages = $ptscrap->getPages();
-                $pins = $ptscrap->getPins();
-                echo json_encode(array('pins' => $pins, 'pages' => $pages));                
+                //var_dump($ptscrap);
+
+                if($ptscrap) {
+                    $pages = $ptscrap->getPages();
+                    $pins = $ptscrap->getPins();    
+                    echo json_encode(array('pins' => $pins, 'pages' => $pages));                
+                }
+                else {
+                    echo json_encode(array('error' => "Could not connect to board"));
+                }
             }
             else {
                 echo json_encode(array('error' => 'Invalid action'));   
