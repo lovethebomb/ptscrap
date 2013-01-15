@@ -11,6 +11,10 @@ class ptscrap extends simple_html_dom {
 	private $pins;
 	private $file;
 
+	/**
+	 * Main constructor
+	 * @param String $url URL String
+	 */
 	public function __construct($url) {
 		$url = "http://www.pinterest.com" . $url;
 		$pinsPerPage = 50;
@@ -19,6 +23,7 @@ class ptscrap extends simple_html_dom {
 		$this->board = $urlArray[4];
 		$this->url = $url;
 		$this->html = file_get_html($url);
+
 		if($this->html) {
 		    foreach($this->html->find('div[id=BoardStats]') as $pin) {
 		        $plaintext = $pin->innertext;
@@ -29,8 +34,7 @@ class ptscrap extends simple_html_dom {
 			    $plaintext = explode('>', $plaintext[1]);
 			    $pins = (int)$plaintext[1];
 			    $this->pins = $pins;	
-		    }
-		    else {
+		    } else {
 		    	$plaintext = explode('>', $plaintext);
 		    	$plaintext = explode('<', $plaintext[1]);
 			    $pins = (int)$plaintext[0];
@@ -45,17 +49,20 @@ class ptscrap extends simple_html_dom {
 
 			    $this->pages = $pages; 
 			    $this->html->clear();
-			}
-			else {
+			} else {
 				return false;
 			}
-
-	    } 
-	    else {
+			
+		// If no data scraped, return false	
+	    }  else {
 	    	return false;
 	    }
 	}
 
+	/**
+	 * Scrap Pinterest page
+	 * @return Mixed false or Array of elements
+	 */
 	public function scrape() {
 		if($this->html) {
 			$array = Array();
@@ -78,6 +85,10 @@ class ptscrap extends simple_html_dom {
 		}
 	}
 
+	/**
+	 * Create the connection with cURL to URL
+	 * @return Boolean 
+	 */
 	public function create() {
     	$i = 1;
 	    foreach($this->images as $page) {
@@ -92,6 +103,7 @@ class ptscrap extends simple_html_dom {
             if(file_exists($saveto)){
                 unlink($saveto);
             }
+
             $fp = fopen($saveto,'x');
             fwrite($fp, $raw);
             fclose($fp);
@@ -100,6 +112,10 @@ class ptscrap extends simple_html_dom {
 	    return true;
 	}
 
+	/**
+	 * Deliver final zip to download
+	 * @return Boolean 
+	 */
 	public function deliver() {
 		 // we deliver a zip file
 		// filename for the browser to save the zip file
@@ -111,6 +127,7 @@ class ptscrap extends simple_html_dom {
 
 		exec('zip -o ' . $path . ' ' . $tmp_zip . ' * -x index.html');
 		$filesize = filesize($path);
+
 		exec('mv ' . $path . ' ../files');
 		$this->file = $path;
 
@@ -119,23 +136,37 @@ class ptscrap extends simple_html_dom {
 			unlink($file);
 		}
 
-
 		return true;
-
 	}
 
+	/**
+	 * returns URL of Object
+	 * @return String URL
+	 */
 	public function getUrl() {
 		return $this->url;
 	}	
 	
+	/**
+	 * returns Pages number
+	 * @return Integer Number of pages to scrap
+	 */
 	public function getPages() {
 		return $this->pages;
 	}	
 
+	/**
+	 * returns number of Pins of current board
+	 * @return Integer Number of Pins
+	 */
 	public function getPins() {
 		return $this->pins;
 	}	
 
+	/**
+	 * returns zip filename
+	 * @return String Filename to download
+	 */
 	public function getFilename() {
 		return $this->file;
 	}	

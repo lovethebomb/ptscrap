@@ -17,6 +17,7 @@ jQuery(document).ready(function($) {
 		console.log('url ' + url);
 		$(this).prop('disabled', true);
 		
+		// Timer
 		timer =  setInterval( function() {
 	  		console.log('Timer called');
 			$.ajax({  
@@ -33,10 +34,13 @@ jQuery(document).ready(function($) {
 				}
 			});
 		}, 2000);
+
 		getTotalPins(url);
 		if(goodBoard) {
 			scrap(url);	
 		}
+
+		// Do not reload the page
 		return false;
 	});
 
