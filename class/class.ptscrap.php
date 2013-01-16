@@ -24,12 +24,13 @@ class ptscrap extends simple_html_dom {
 		$this->url = $url;
 		$this->html = file_get_html($url);
 
-		if($this->html) {
-		    foreach($this->html->find('div[id=BoardStats]') as $pin) {
+		// If we managed to scrape some data then trim and extract useful data
+		if( $this->html ) {
+		    foreach( $this->html->find('div[id=BoardStats]' ) as $pin) {
 		        $plaintext = $pin->innertext;
 		    }
 		    
-		    if(strstr($plaintext, ',')) {
+		    if( strstr($plaintext, ',') ) {
 			    $plaintext = explode(',', $plaintext);
 			    $plaintext = explode('>', $plaintext[1]);
 			    $pins = (int)$plaintext[1];
@@ -41,20 +42,21 @@ class ptscrap extends simple_html_dom {
 			    $this->pins = $pins;	
 		    }
 
-		    if($pins != 0) {
-			    if($pins > 50)
+		    if( $pins != 0 ) {
+			    if( $pins > 50 ) {
 			        $pages = ceil($pins/$pinsPerPage);
-			    else
+			    }
+			    else {
 			        $pages = 1;
+			    }
 
 			    $this->pages = $pages; 
 			    $this->html->clear();
 			} else {
 				return false;
-			}
-			
-		// If no data scraped, return false	
-	    }  else {
+			}	
+	    }  
+	    else {
 	    	return false;
 	    }
 	}
@@ -64,10 +66,11 @@ class ptscrap extends simple_html_dom {
 	 * @return Mixed false or Array of elements
 	 */
 	public function scrape() {
-		if($this->html) {
+		if( $this->html ) {
 			$array = Array();
-		    // get article block
-		    for($i = 1; $i <= $this->pages; $i++) {
+		    
+		    // Get article block and parse it for pins
+		    for( $i = 1; $i <= $this->pages; $i++ ) {
 		    	$this->html = file_get_html($this->url . "?page=" . $i);
 			    foreach($this->html->find('div[class=pin]') as $article) {
 			        $array[] = $article->attr['data-closeup-url'];
@@ -78,6 +81,7 @@ class ptscrap extends simple_html_dom {
 		    $this->html->clear();
 		    unset($this->html);
 		    $this->images = $array;
+
 		    return $array;
 		}
 		else {
@@ -91,24 +95,29 @@ class ptscrap extends simple_html_dom {
 	 */
 	public function create() {
     	$i = 1;
-	    foreach($this->images as $page) {
+	    foreach( $this->images as $page ) {
             $ch = curl_init ($page);
             curl_setopt($ch, CURLOPT_HEADER, 0);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_BINARYTRANSFER,1);
             $raw=curl_exec($ch);
             curl_close ($ch);
+
+            // Set the image path and name
             $saveto = "tmp/pinterest_".$this->user. "_" . $this->board . "_" . $i . ".jpg";
             
+            // Unlink any other existing image with the same name
             if(file_exists($saveto)){
                 unlink($saveto);
             }
 
+            // Save cURL output to file
             $fp = fopen($saveto,'x');
             fwrite($fp, $raw);
             fclose($fp);
             $i++;
 	    }
+
 	    return true;
 	}
 
@@ -117,22 +126,28 @@ class ptscrap extends simple_html_dom {
 	 * @return Boolean 
 	 */
 	public function deliver() {
-		 // we deliver a zip file
+		// we deliver a zip file
+		
 		// filename for the browser to save the zip file
 		$tmp = tempnam("tmp", "tempname");
 		$tmp_zip = $tmp . ".zip";
 		$path = "pinterest_" . $this->user . "_" . $this->board .   ".zip";
+		
+		// Clear the temp file
 		chdir("tmp");
 		unlink($tmp);	
 
+		// Zip board images
 		exec('zip -o ' . $path . ' ' . $tmp_zip . ' * -x index.html');
 		$filesize = filesize($path);
 
+		// And move it file sfolder
 		exec('mv ' . $path . ' ../files');
 		$this->file = $path;
 
+		// Then clean all the temp downloaded jpeg
 		$files = glob("*.jpg");
-		foreach($files as $file) {
+		foreach( $files as $file ) {
 			unlink($file);
 		}
 

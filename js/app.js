@@ -1,12 +1,15 @@
 jQuery(document).ready(function($) {
 	var timer, totalPins;
 	var goodBoard = false;
+
+	// We hide them for now
 	$("div.result").hide();
 	$("div.file").hide();
 	$("div.error").hide();
 
 	$('input#submit').prop('disabled', false);
 
+	// Manage click event
 	$('input#submit').live('click', function() {
 		console.log('click');
 

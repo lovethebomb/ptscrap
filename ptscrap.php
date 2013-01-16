@@ -31,7 +31,7 @@ if( $_GET ){
 
             // CHECK
             } elseif( $action == "check" ) {
-
+                $files = 0;
                 if ( glob("tmp/*.jpg") != false ) {
                     $files = count(glob("tmp/*.jpg"));
                 }
